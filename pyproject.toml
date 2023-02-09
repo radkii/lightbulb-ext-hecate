@@ -3,7 +3,9 @@ name = "lightbulb-ext-hecate"
 version = "0.1.0"
 description = "File driven wrappers around lightbulb extensions and plugins."
 authors = ["radkii <real.radkii@gmail.com>"]
+license = "MIT"
 readme = "README.md"
+repository = "https://github.com/radkii/lightbulb-ext-hecate"
 packages = [{include = "lightbulb_ext_hecate"}]
 
 [tool.poetry.dependencies]
