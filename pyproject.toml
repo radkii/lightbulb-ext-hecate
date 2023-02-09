@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "lightbulb-ext-hecate"
+version = "0.1.0"
+description = "File driven wrappers around lightbulb extensions and plugins."
+authors = ["radkii <real.radkii@gmail.com>"]
+readme = "README.md"
+packages = [{include = "lightbulb_ext_hecate"}]
+
+[tool.poetry.dependencies]
+python = ">=3.9 <3.12"
+hikari-lightbulb = "^2.3.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
