@@ -53,7 +53,7 @@ class Plugin(lightbulb.Plugin):
                 mod = spec.loader.load_module()
 
                 if not hasattr(mod, 'command'):
-                    raise MissingMethod(f"Command module '{py_name}' doesn't declare a 'command' method")
+                    raise MissingMethodError(f"Command module '{py_name}' doesn't declare a 'command' method")
 
                 params = None
                 if hasattr(mod, 'params') and isinstance(mod.params, Params):
@@ -65,7 +65,7 @@ class Plugin(lightbulb.Plugin):
                         name=mod.name if hasattr(mod, 'name') else py_name[:-3],
                     )
                 else:
-                    raise MissingParams(f"Command module '{py_name}' doesn't contain the necessary attributes")
+                    raise MissingParamsError(f"Command module '{py_name}' doesn't contain the necessary attributes")
 
                 if on_command_error != None:
                     mod.command = catch_command_exceptions(mod.command)
@@ -84,10 +84,10 @@ class Plugin(lightbulb.Plugin):
                 mod = spec.loader.load_module()
 
                 if not hasattr(mod, 'event'):
-                    raise MissingMethod(f"Event module '{py_name}' doesn't declare an 'event' method")
+                    raise MissingMethodError(f"Event module '{py_name}' doesn't declare an 'event' method")
 
                 if not hasattr(hikari, py_name[:-3]):
-                    raise HikariEventNotFound(f"Event module '{py_name}' is not named after a valid event")
+                    raise MissingHikariEventError(f"Event module '{py_name}' is not named after a valid event")
 
                 if on_event_error != None:
                     mod.event = catch_event_exceptions(mod.event)

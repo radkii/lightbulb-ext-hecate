@@ -1,13 +1,13 @@
-__version__ = "0.1.0"
+__version__ = "0.1.2"
 
 __all__ = [
     "Plugin",
     "Option",
     "Params",
     "HecateError",
-    "MissingMethod",
-    "MissingParams",
-    "HikariEventNotFound"
+    "MissingMethodError",
+    "MissingParamsError",
+    "MissingHikariEventError"
 ]
 
 from .plugin import *

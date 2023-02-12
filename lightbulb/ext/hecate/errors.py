@@ -2,9 +2,9 @@ from lightbulb import LightbulbError
 
 __all__ = [
     "HecateError",
-    "MissingParams",
-    "MissingMethod",
-    "HikariEventNotFound"
+    "MissingParamsError",
+    "MissingMethodError",
+    "MissingHikariEventError"
 ]
 
 class HecateError(LightbulbError):
@@ -13,19 +13,19 @@ class HecateError(LightbulbError):
     of this exception.
     """
 
-class MissingParams(HecateError):
+class MissingParamsError(HecateError):
     '''
     Exception raised when a command module accessed by a hecate `Plugin` does not
     contain a `params` attribute or the required params attributes in separate.
     '''
 
-class MissingMethod(HecateError):
+class MissingMethodError(HecateError):
     '''
     Exception raised when a module accessed by a hecate `Plugin` does not declare a
     `command` or `event` method.
     '''
 
-class HikariEventNotFound(HecateError):
+class MissingHikariEventError(HecateError):
     '''
     Exception raised when an event module accessed by a hecate `Plugin` has a name
     that doesn't match any hikari events.
