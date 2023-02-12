@@ -1,6 +1,11 @@
 import hikari
 import lightbulb
 
+__all__ = [
+    "Option",
+    "Params"
+]
+
 class Option():
     def __init__(self, name : str, description : str, var_type : hikari.OptionType) -> None:
         self.__name = name
