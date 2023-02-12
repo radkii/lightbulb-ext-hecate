@@ -1,5 +1,12 @@
 from lightbulb import LightbulbError
 
+__all__ = [
+    "HecateError",
+    "MissingParams",
+    "MissingMethod",
+    "HikariEventNotFound"
+]
+
 class HecateError(LightbulbError):
     """
     Base hecate exception class. All errors raised by hecate will be a subclass

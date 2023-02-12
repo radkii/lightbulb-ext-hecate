@@ -7,6 +7,10 @@ from .params import *
 from importlib.util import spec_from_file_location
 from .errors import *
 
+__all__ = [
+    "Plugin"
+]
+
 __command_types = [
     ("prefix-command", lightbulb.commands.PrefixCommand),
     ("message-command", lightbulb.commands.MessageCommand),
@@ -88,6 +92,4 @@ class Plugin(lightbulb.Plugin):
                 if on_event_error != None:
                     mod.event = catch_event_exceptions(mod.event)
                 mod.event = self.listener(getattr(hikari, py_name[:-3]))(mod.event)
-
-
-        
+     
