@@ -5,17 +5,25 @@ import glob
 import logging
 from .params import *
 from .errors import *
-from .props import *
+from .properties import *
 from importlib.util import spec_from_file_location
 
 __all__ = [
-    "Plugin"
+    "Plugin",
+    "CommandContext"
 ]
 
 _LOGGER = logging.getLogger("hecate.plugin")
 
+class CommandContext():
+    def __init__(self, category: lightbulb.commands.Command, params: Params, properties: Properties, path: str) -> None:
+        self.category = category
+        self.params = params
+        self.properties = properties
+        self.path = path
+
 class Plugin(lightbulb.Plugin):
-    def __init__(self, name: str, extension_path: str, default_properties={}, on_command_error=None, on_event_error=None) -> None:
+    def __init__(self, name: str, extension_path: str, default_properties={}, on_command_error=None, on_event_error=None, on_method_enter=None, on_method_exit=None) -> None:
         super().__init__(name)
 
         self.__command_types = {
@@ -26,6 +34,17 @@ class Plugin(lightbulb.Plugin):
         }
 
         self.__properties = default_properties
+
+        def enter_exit_decorator(com_ctx):
+            def dec(func):
+                async def new_func(ctx):
+                    if on_method_enter:
+                        await on_method_enter(com_ctx, ctx)
+                    await func(ctx)
+                    if on_method_exit:
+                        await on_method_exit(com_ctx, ctx)
+                return new_func    
+            return dec            
 
         def catch_command_exceptions(func):
             async def new_func(ctx):
@@ -76,6 +95,12 @@ class Plugin(lightbulb.Plugin):
                 else:
                     raise MissingParamsError(f"Command module '{py_name}' doesn't contain the necessary attributes")
 
+                if on_method_enter != None or on_method_exit != None:
+                    mod.command = enter_exit_decorator(CommandContext(
+                        self.__command_types[command], 
+                        params,
+                        mod.properties if hasattr(mod, 'properties') else None,
+                        py_file))(mod.command)
                 if on_command_error != None:
                     mod.command = catch_command_exceptions(mod.command)
                 mod.command = lightbulb.implements(self.__command_types[command])(mod.command)

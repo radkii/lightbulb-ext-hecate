@@ -2,6 +2,7 @@ __version__ = "0.1.3"
 
 __all__ = [
     "Plugin",
+    "CommandContext",
     "Option",
     "Params",
     "Properties",
@@ -12,7 +13,7 @@ __all__ = [
     "PropertyBuildError"
 ]
 
-from .props import Properties
-from .plugin import Plugin
+from .properties import Properties
+from .plugin import Plugin, CommandContext
 from .params import Params, Option
 from .errors import *
