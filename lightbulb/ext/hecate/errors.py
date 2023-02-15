@@ -31,3 +31,7 @@ class MissingHikariEventError(HecateError):
     that doesn't match any hikari events.
     '''
    
+class PropertyBuildError(HecateError):
+    '''
+    Exception raised when a property object is created with a truthy value.
+    '''
