@@ -1,4 +1,4 @@
-# lightbulb-ext-hecate
+# Hecate
 File driven wrappers around lightbulb extensions and plugins.
 
 ## Installation
