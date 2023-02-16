@@ -37,11 +37,11 @@ class Params():
 
     Args:
         description (`str`): The description of the command.
-        options (`list[hecate.Option]`): All the options of the command. `None` by default.
-        name (`str`): The name of the command. `None` by default, which grabs the name from
+        options (`list[hecate.Option]`): All the options of the command. `[]` by default.
+        name (`str`): The name of the command. `""` by default, which grabs the name from
         the file.
     '''
-    def __init__(self, description: str, options=None, name=None) -> None:
+    def __init__(self, description: str, options=[], name="") -> None:
         self.description = description
         self.options = options
         self.name = name

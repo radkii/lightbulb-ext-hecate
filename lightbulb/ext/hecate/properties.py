@@ -19,4 +19,4 @@ class Properties():
 
     def update(self, ext_properties: dict):
         for key in self.__property_request:
-            setattr(self, key, ext_properties[key] if key in ext_properties else self.property_request[key])
+            setattr(self, key, ext_properties[key] if key in ext_properties else self.__property_request[key])
