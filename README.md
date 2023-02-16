@@ -27,3 +27,16 @@ will become
 ├── __modify__.py
 └── extension.py
 ```
+
+## Usage
+```python
+# Import the Plugin class
+from lightbulb.ext.hecate import Plugin
+
+# Create a Plugin instance (__file__ is necessary to fetch the commands and events in other files)
+plugin = Plugin('EXTENSION', __file__)
+
+# Plain lightbulb extension load method
+def load(bot):
+    bot.add_plugin(plugin)
+```
