@@ -23,7 +23,8 @@ will become
 ```bash
 .
 ├── slash-commands
-│   └── pong.py
+│   ├── pong_count.py
+│   └── ping.py
 ├── __modify__.py
 └── extension.py
 ```

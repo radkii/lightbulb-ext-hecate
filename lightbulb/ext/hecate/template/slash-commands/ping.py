@@ -17,7 +17,9 @@ options = [
 # Declaring a 'pongs' shared attribute so the two commands work together
 properties = Properties(pongs=0)
 
-# Necessary 'command' method, that takes a Context object as argument
+# Necessary 'command' method, that takes a Context object as argument.
+# Increments the number of pongs by the 'amount' option, and raises ValueError
+# if it's less than 1 
 def command(ctx: Context):
     cur_pongs = ctx.options.amount
     if cur_pongs < 1:
