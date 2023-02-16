@@ -25,6 +25,16 @@ command_types = {
 _LOGGER = logging.getLogger("hecate.plugin")
 
 class CommandContext():
+    '''
+    Class that holds information about a given command.
+
+    Args:
+        category (`lightbulb.commands.Command`): The `Command` subclass that the given command
+        is associated to.
+        params (`hecate.Params`): The params object found in the command file.
+        properties (`hecate.Properties`): The properties object found in the command file.
+        path (`str`): The path of the command file.
+    '''
     def __init__(self, category: lightbulb.commands.Command, params: Params, properties: Properties, path: str) -> None:
         self.category = category
         self.params = params
@@ -32,15 +42,53 @@ class CommandContext():
         self.path = path
 
 class EventContext():
-    def __init__(self, category: lightbulb.commands.Command, properties: Properties, path: str) -> None:
+    '''
+    Class that holds information about a given event.
+
+    Args:
+        category (`hikari.Event`): The `Event` subclass that the given event
+        is associated to.
+        properties (`hecate.Properties`): The properties object found in the event file.
+        path (`str`): The path of the event file.
+    '''
+    def __init__(self, category: hikari.Event, properties: Properties, path: str) -> None:
         self.category = category
         self.properties = properties
         self.path = path
 
 class Plugin(lightbulb.Plugin):
-    def __init__(self, name: str, extension_path: str, default_properties={}, on_command_error=None,
-on_event_error=None, on_command_enter=None, on_command_exit=None) -> None:
-        super().__init__(name)
+    '''
+    Subclass of `lightbulb.Plugin` that grabs all commands and events in specific directories,
+    on instantiation.
+
+    Args:
+        name (`str`): Name of the plugin.
+        extension_path (`str`): Path to the extension, which will always be `__file__`.
+        default_properties (`dict`): Mapping with the default value that should be given to
+        all `Properties` objects that request it.
+        on_command_error (`method`): Error handling method for commands. If passed here,
+        overwrites the one defined in `__modify__.py`. `None` by default.
+        on_event_error (`method`): Error handling method for events. If passed here,
+        overwrites the one defined in `__modify__.py`. `None` by default.
+        on_command_enter(`method`): Called before every command. If passed here,
+        overwrites the one defined in `__modify__.py`. `None` by default.
+        on_command_exit (`method`): Called after every command. If passed here,
+        overwrites the one defined in `__modify__.py`. `None` by default.
+    '''
+    def __init__(
+        self, 
+        name: str, 
+        extension_path: str, 
+        default_properties={}, 
+        on_command_error=None,
+        on_event_error=None, 
+        on_command_enter=None, 
+        on_command_exit=None, 
+        description=None,
+        include_datastore=False,
+        default_enabled_guilds=hikari.UNDEFINED
+    ) -> None:
+        super().__init__(name, description, include_datastore, default_enabled_guilds)
 
         self.__properties = default_properties
 
@@ -67,22 +115,6 @@ on_event_error=None, on_command_enter=None, on_command_exit=None) -> None:
                         await on_command_exit(com_ctx, ctx)
                 return new_func    
             return dec            
-
-        # def catch_command_exceptions(func):
-        #     async def new_func(ctx):
-        #         try:
-        #             await func(ctx)
-        #         except:
-        #             await on_command_error(ctx)
-        #     return new_func
-
-        # def catch_event_exceptions(func):
-        #     async def new_func(e):
-        #         try:
-        #             await func(e)
-        #         except:
-        #             await on_event_error(e)
-        #     return new_func
 
         def catch_exception_decorator(com_ctx, on_error_func):
             def dec(func):

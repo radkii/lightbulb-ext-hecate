@@ -5,6 +5,9 @@ __all__ = [
 ]
 
 class Properties():
+    '''
+    Class for defining shared attributes between commands and events.
+    '''
     def __init__(self, **kwargs) -> None:
         for key in kwargs:
             if bool(kwargs[key]):
