@@ -1,8 +1,10 @@
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 
 __all__ = [
     "Plugin",
     "CommandContext",
+    "EventContext",
+    "command_types",
     "Option",
     "Params",
     "Properties",
@@ -14,6 +16,6 @@ __all__ = [
 ]
 
 from .properties import Properties
-from .plugin import Plugin, CommandContext
+from .plugin import Plugin, CommandContext, EventContext, command_types
 from .params import Params, Option
 from .errors import *
