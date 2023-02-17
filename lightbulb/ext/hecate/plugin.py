@@ -24,6 +24,9 @@ command_types = {
 
 _LOGGER = logging.getLogger("hecate.plugin")
 
+def hastypedattr(obj, name, type):
+    return hasattr(obj, name) and isinstance(getattr(obj, name), type)
+
 class CommandContext():
     '''
     Class that holds information about a given command.
@@ -91,11 +94,12 @@ class Plugin(lightbulb.Plugin):
         super().__init__(name, description, include_datastore, default_enabled_guilds)
 
         self.__properties = default_properties
+        #self.__extension_path = extension_path
+        self.__dir_path = os.path.dirname(extension_path)
 
-        modify_path = os.path.join(os.path.dirname(extension_path), '__modify__.py')
+        modify_path = os.path.join(self.__dir_path, '__modify__.py')
         if os.path.exists(modify_path):
-            spec = spec_from_file_location('__modify__.py', modify_path)
-            mod = spec.loader.load_module()
+            mod = spec_from_file_location('__modify__.py', modify_path).loader.load_module()
             if on_command_error == None and hasattr(mod, 'on_command_error'):
                 on_command_error = mod.on_command_error
             if on_event_error == None and hasattr(mod, 'on_event_error'):
@@ -126,27 +130,25 @@ class Plugin(lightbulb.Plugin):
                 return new_func    
             return dec 
 
-
-        dir_path = os.path.dirname(extension_path)
+        property_mods = []
         for command in command_types:
-            grab_path = os.path.join(dir_path, command)
-            if not os.path.exists(grab_path):
-                continue
+            # grab_path = os.path.join(self.__dir_path, command)
+            # if not os.path.exists(grab_path):
+            #     continue
             
             py_valid = 0
-            for py_file in glob.glob(os.path.join(grab_path, "[!_]*.py")):
+            for py_file in self.__call__(command):
                 py_name = os.path.basename(py_file)
-                # if py_name.startswith('_'):
-                #     continue
 
-                spec = spec_from_file_location(py_name, py_file)
-                mod = spec.loader.load_module()
+                mod = spec_from_file_location(py_name, py_file).loader.load_module()
 
                 if not hasattr(mod, 'command'):
                     raise MissingMethodError(f"Command module '{py_name}' doesn't declare a 'command' method")
 
-                if hasattr(mod, 'properties') and isinstance(mod.properties, Properties):
-                    mod.properties.update(self.__properties)
+                has_properties = hastypedattr(mod, 'properties', Properties)
+                if has_properties:
+                    # mod.properties.update(self.__properties)
+                    property_mods.append(mod)
 
                 params = None
                 if hasattr(mod, 'params') and isinstance(mod.params, Params):
@@ -154,8 +156,8 @@ class Plugin(lightbulb.Plugin):
                 elif hasattr(mod, 'description') and isinstance(mod.description, str):
                     params = Params(
                         description=mod.description,
-                        options=mod.options if hasattr(mod, 'options') else [],
-                        name=mod.name if hasattr(mod, 'name') else py_name[:-3],
+                        options=mod.options if hastypedattr(mod, 'options', list) else [],
+                        name=mod.name if hastypedattr(mod, 'name', str) else py_name[:-3],
                     )
                 else:
                     raise MissingParamsError(f"Command module '{py_name}' doesn't contain the necessary attributes")
@@ -163,13 +165,12 @@ class Plugin(lightbulb.Plugin):
                 com_ctx = CommandContext(
                     command_types[command], 
                     params,
-                    mod.properties if hasattr(mod, 'properties') else None,
+                    mod.properties if has_properties else None,
                     py_file
                 )
                 if on_command_enter != None or on_command_exit != None:
                     mod.command = enter_exit_decorator(com_ctx)(mod.command)
                 if on_command_error != None:
-                    # mod.command = catch_command_exceptions(mod.command)
                     mod.command = catch_exception_decorator(com_ctx, on_command_error)(mod.command)
                 mod.command = lightbulb.implements(command_types[command])(mod.command)
                 params.process_module(mod)
@@ -178,34 +179,46 @@ class Plugin(lightbulb.Plugin):
             if py_valid:
                 _LOGGER.info(f"Fetched {py_valid} commands from '{command}'")
         
-        event_path = os.path.join(dir_path, "events")
-        if os.path.exists(event_path):
-            py_valid = 0
-            for py_file in glob.glob(os.path.join(event_path, "[!_]*.py")):
-                py_name = os.path.basename(py_file)
-                # if py_name.startswith('_'):
-                #     continue
+        # for command in command_types:
+        #     for py_file in self.__call__(command):
+        #         py_name = os.path.basename(py_file)
+        #         mod = spec_from_file_location(py_name, py_file).loader.load_module()
+        #         if hasattr(mod, 'properties') and isinstance(mod.properties, Properties):
+        #             property_mods.append(mod)
+        
+        for mod in property_mods:
+            mod.properties.insert(self.__properties)
+        for mod in property_mods:
+            mod.properties.update(self.__properties)
 
-                spec = spec_from_file_location(py_name, py_file)
-                mod = spec.loader.load_module()
+        py_valid = 0
+        for py_file in self.__call__('events'):
+            py_name = os.path.basename(py_file)
 
-                if not hasattr(mod, 'event'):
-                    raise MissingMethodError(f"Event module '{py_name}' doesn't declare an 'event' method")
+            mod = spec_from_file_location(py_name, py_file).loader.load_module()
 
-                if not hasattr(hikari, py_name[:-3]):
-                    raise MissingHikariEventError(f"Event module '{py_name}' is not named after a valid event")
+            if not hasattr(mod, 'event'):
+                raise MissingMethodError(f"Event module '{py_name}' doesn't declare an 'event' method")
 
+            if not hasattr(hikari, py_name[:-3]):
+                raise MissingHikariEventError(f"Event module '{py_name}' is not named after a valid event")
 
-                e_ctx = EventContext(
-                    getattr(hikari, py_name[:-3]),
-                    mod.properties if hasattr(mod, 'properties') else None,
-                    py_file
-                )
-                if on_event_error != None:
-                    # mod.event = catch_event_exceptions(mod.event)
-                    mod.event = catch_exception_decorator(e_ctx, on_event_error)(mod.event)
-                mod.event = self.listener(getattr(hikari, py_name[:-3]))(mod.event)
-                py_valid += 1
-            if py_valid:
-                _LOGGER.info(f"Fetched {py_valid} events")
-     
+            e_ctx = EventContext(
+                getattr(hikari, py_name[:-3]),
+                mod.properties if hastypedattr(mod, 'properties', Properties) else None,
+                py_file
+            )
+            if on_event_error != None:
+                mod.event = catch_exception_decorator(e_ctx, on_event_error)(mod.event)
+            mod.event = self.listener(getattr(hikari, py_name[:-3]))(mod.event)
+            py_valid += 1
+        if py_valid:
+            _LOGGER.info(f"Fetched {py_valid} events")
+
+    def __call__(self, type_str: str):
+        if not type_str in command_types and type_str != 'events':
+            raise ValueError
+        new_path = os.path.join(self.__dir_path, type_str)
+        if not os.path.exists(new_path):
+            return iter([])
+        return iter(glob.glob(os.path.join(self.__dir_path, type_str, "[!_]*.py")))

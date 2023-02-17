@@ -10,7 +10,7 @@ from hikari import Event
 
 # Handles command errors
 async def on_command_error(com_ctx: CommandContext, ctx: Context):
-    await ctx.edit_last_response(f"` > Command '{com_ctx.params.name}' threw an error :( `")
+    await ctx.respond(f"` > Command '{com_ctx.params.name}' threw an error :( `")
 
 # Called before a command is ran
 # async def on_command_enter(com_ctx: CommandContext, ctx: Context):

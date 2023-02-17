@@ -16,4 +16,4 @@ properties = Properties(pongs=0)
 # Necessary 'command' method, that takes a Context object as argument.
 # Responds with the number of pongs
 async def command(ctx: Context):
-    await ctx.respond(f"{properties.pongs} pongs to date")
+    await ctx.respond(f"{properties.pongs} pongs ponged")
