@@ -6,7 +6,7 @@ authors = ["Radkii <real.radkii@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/radkii/lightbulb-ext-hecate"
-packages = [{include = "lightbulb\\ext\\hecate"}]
+packages = [{include = "lightbulb/ext/hecate"}]
 
 [tool.poetry.dependencies]
 python = ">=3.9 <3.12"
