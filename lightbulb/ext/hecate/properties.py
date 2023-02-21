@@ -7,11 +7,12 @@ __all__ = [
 class Properties():
     '''
     Class for defining shared attributes between commands and events.
+
+    Args:
+        **kwargs (`dict`): A key-value pair related to a shared extension attribute.
+        It will be resolved upon instantiating the associated extension.
     '''
     def __init__(self, **kwargs) -> None:
-        # for key in kwargs:
-        #     if bool(kwargs[key]):
-        #         raise PropertyBuildError(f"Property '{key}' must be initialized with an empty value.")
         self.__property_request = kwargs
 
     def __contains__(self, __o: object) -> bool:
@@ -22,7 +23,7 @@ class Properties():
             if not key in ext_properties:
                 ext_properties[key] = self.__property_request[key]
             if bool(self.__property_request[key]):
-                if bool(ext_properties[key]):
+                if bool(ext_properties[key]) and ext_properties[key] != self.__property_request[key]:
                     raise PropertyBuildError(f"Conflicting assignment of truthy values to property '{key}' ({ext_properties[key]} and {self.__property_request[key]})")
                 else:
                     ext_properties[key] = self.__property_request[key]

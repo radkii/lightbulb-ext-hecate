@@ -1,3 +1,5 @@
+[![PyPI](https://img.shields.io/pypi/v/lightbulb-ext-hecate)](https://pypi.org/project/lightbulb-ext-hecate)
+
 # Hecate
 File driven wrappers around lightbulb extensions and plugins.
 
@@ -31,6 +33,8 @@ will become
 
 ## Usage
 ```python
+# File: extension.py
+
 # Import the Plugin class
 from lightbulb.ext.hecate import Plugin
 
@@ -41,3 +45,11 @@ plugin = Plugin('EXTENSION', __file__)
 def load(bot):
     bot.add_plugin(plugin)
 ```
+
+## Issues
+If you find any bugs, issues, or unexpected behaviour while using the library,
+you should open an issue with details of the problem and how to reproduce if possible.
+Please also open an issue for any new features you would like to see added.
+
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
