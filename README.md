@@ -60,6 +60,7 @@ A command associated with a hecate extension can be added by creating a python f
 - `message-commands`
 - `user-commands`
 - `slash-commands`
+
 (matching the `lightbulb.commands.Command` subclass of the same name).
 Hecate, by default, will interpret the file name `COMMAND_NAME` as the name of the command (without the extension :P). However, a different name can be set in the contents of the file.
 
@@ -145,7 +146,7 @@ Implemented modifiers:
 - `on_command_enter(com_ctx: CommandContext, ctx: Context)` - called before a command
 - `on_command_exit(com_ctx: CommandContext, ctx: Context)` - called after a command
 
-They can also be declared on the `hecate.Plugin` object, which will override the `__modify__.py` declaration
+They can also be declared on the `hecate.Plugin` object, which will override the `__modify__.py` declaration:
 ```python
 plugin = Plugin('EXTENSION', __file__, on_event_error=func1, on_command_error=func2, ...)
 ```
