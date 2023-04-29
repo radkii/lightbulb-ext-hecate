@@ -24,14 +24,20 @@ The following directory structure
 will become
 ```bash
 .
+├── events
+│   ├── GuildMessageCreateEvent.py
+│   ├── _GuildMessageDeleteEvent.py
 ├── slash-commands
-│   ├── pong_count.py
-│   └── ping.py
+│   ├── ping.py
+│   └── pong_count.py
 ├── __modify__.py
 └── extension.py
 ```
+where `REL_PATH_TO_PY` is `extension.py`
 
 ## Usage
+
+The structure of a hecate extension file is as follows:
 ```python
 # File: extension.py
 
@@ -45,6 +51,108 @@ plugin = Plugin('EXTENSION', __file__)
 def load(bot):
     bot.add_plugin(plugin)
 ```
+
+### Adding commands
+
+A command associated with a hecate extension can be added by creating a python file - `COMMAND_TYPE/COMMAND_NAME` - in the extension directory.
+`COMMAND_TYPE` should be one of:
+- `prefix-commands`
+- `message-commands`
+- `user-commands`
+- `slash-commands`
+(matching the `lightbulb.commands.Command` subclass of the same name).
+Hecate, by default, will interpret the file name `COMMAND_NAME` as the name of the command (without the extension :P). However, a different name can be set in the contents of the file.
+
+All commands must declare a `command` async method:
+```python
+async def command(ctx: lightbulb.Context):
+    pass
+```
+
+Command attributes like `description`, `options` and `name` can be set by simply declaring the appropriate variables:
+```python
+description : str = "Replies with 'Pong!'"
+options : list[hecate.Option] = [Option('amount', "Number of times to ping", int)]
+name : str = 'ping'
+```
+
+Alternatively, the `hecate.Params` object can be used. A hecate extension will prioritize any attributes set in the params object.
+```python
+params = hecate.Params(
+    description="Replies with 'Pong!'",
+    options=[Option('amount', "Number of times to ping", int)],
+    name='ping'
+)
+```
+
+### Adding events
+
+An event associated with a hecate extension can be added by creating a python file - `events/HIKARI_EVENT` - in the extension directory.
+`HIKARI_EVENT` should be a valid hikari event.
+
+All events must declare an `event` async method:
+```python
+async def event(e: hikari.Event):
+    pass
+```
+
+### Shared attributes
+
+It may be necessary for commands to share attributes, such as in the template. The `hecate.Properties` object can be used to achieve this. A command/event can request to access a shared attribute, and all the requests will be resolved when the hecate extension loads.
+The requests are made by means of keyword arguments in the constructor:
+```python
+# properties.foo and properties.bar will be available in the command/event method
+properties = hecate.Properties(foo=0, bar="")
+```
+
+A command/event will not have access to attributes that it didn't specify in the constructor, even if they were requested somewhere else. Requests should have as value `None`, a falsy value or all hold the same truthy value. The last truthy value found will be the default value for the given attribute, upon resolving.
+```python
+# File: command1.py
+properties = Properties(foo=0)
+# File command2.py
+properties = Properties(foo=5)
+# ...
+# OK (properties.foo == 5 for both)
+
+# File: command1.py
+properties = Properties(foo=0)
+# File command2.py
+properties = Properties(foo=0)
+# ...
+# OK (properties.foo == 0 for both)
+
+# File: command1.py
+properties = Properties(foo=3)
+# File command2.py
+properties = Properties(foo=5)
+# ...
+# ERROR
+```
+
+The optional argument `default_properties` on the `hecate.Plugin` object will, if defined, override all previous logic and set the default value of the given attributes.
+```python
+plugin = Plugin('EXTENSION', __file__, default_properties={'foo': 5})
+```
+
+### Modifiers
+
+Modifiers can be useful to add the same piece of functionality to all commands at once, for example, to debug commands or handle errors.
+They are declared as async methods in the python file `__modify__.py` in the extension directory.
+
+Implemented modifiers:
+- `on_event_error(e_ctx: hecate.EventContext, e: hikari.Event)` - called when an event throws an error
+- `on_command_error(com_ctx: hecate.CommandContext, lightbulb.ctx: Context)` - called when a command throws an error
+- `on_command_enter(com_ctx: CommandContext, ctx: Context)` - called before a command
+- `on_command_exit(com_ctx: CommandContext, ctx: Context)` - called after a command
+
+They can also be declared on the `hecate.Plugin` object, which will override the `__modify__.py` declaration
+```python
+plugin = Plugin('EXTENSION', __file__, on_event_error=func1, on_command_error=func2, ...)
+```
+
+### Other features
+
+Prefixing the file name of a command or event with `_` will disable it, making the hecate extension ignore the file completely.
 
 ## Issues
 If you find any bugs, issues, or unexpected behaviour while using the library,
